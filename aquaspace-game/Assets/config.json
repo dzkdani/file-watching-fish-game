@@ -1,11 +1,13 @@
 {
   "fishMinSpd": 1.0,
   "fishMaxSpd": 5.0,
-  "fishHungerCooldown": 10.0,
-  "fishDetectionRadius": 5.0,
+  "fishMaxHungerMeter": 100.0,
+  "fishHungerDecay": 10.0,
+  "fishHungerCooldown": 3.0,
+  "foodDetectionRadius": 5.0,
   "trashMinSpd": 0.5,
   "trashMaxSpd": 2.0,
-  "spawnRadius": 5,
-  "maxFish": 20,
+  "maxFish": 2,
+  "maxTrash": 1,
   "scanInterval": 1.0
 }

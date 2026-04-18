@@ -700,7 +700,7 @@ PlayerSettings:
   qnxGraphicConfPath: 
   apiCompatibilityLevel: 6
   captureStartupLogs: {}
-  activeInputHandler: 1
+  activeInputHandler: 2
   windowsGamepadBackendHint: 0
   cloudProjectId: 23bc2250-2cd2-493b-88b0-21f543479fd1
   framebufferDepthMemorylessMode: 0
