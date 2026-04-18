@@ -1,4 +1,5 @@
 using UnityEngine;
+using AquaspaceGame.Pooling;
 
 public class InputSystem : MonoBehaviour
 {
@@ -49,9 +50,10 @@ public class InputSystem : MonoBehaviour
 
         if (hit.CompareTag("Trash"))
         {
-            if (SpawnSystem.Instance == null || !SpawnSystem.Instance.DespawnTrash(hit.gameObject))
+            if (SpawnSystem.Instance == null || !SpawnSystem.Instance.Despawn(hit.gameObject, hit.tag))
             {
-                Destroy(hit.gameObject);
+                Debug.Log($"Trash{hit.gameObject.name} clicked but failed to despawn from pool");
+                // Destroy(hit.gameObject);
             }
             return;
         }
@@ -66,30 +68,47 @@ public class InputSystem : MonoBehaviour
     {
         if (foodPrefab != null)
         {
-            GameObject spawned = Instantiate(foodPrefab, pos, Quaternion.identity, ResolveFoodParent());
-            SetupFoodRuntimeComponents(spawned);
-            return;
+            string objectName = $"Food_{Time.frameCount}";
+            string poolKey = $"food::{objectName}";
+            GameObject foodObject;
+
+            if (poolKey.TryAcquireFromPool(out foodObject))
+            {
+                foodObject.transform.SetParent(ResolveFoodParent());
+                foodObject.transform.position = pos;
+                SetupFoodRuntimeComponents(foodObject);
+                return;
+            }
+            else
+            {
+                foodObject = Instantiate(foodPrefab, pos, Quaternion.identity, ResolveFoodParent());
+                foodObject.AssignPoolKey(poolKey);
+                foodObject.transform.SetParent(ResolveFoodParent());
+                foodObject.transform.position = pos;
+                SetupFoodRuntimeComponents(foodObject);
+                return;
+            }
         }
 
-        GameObject food = new GameObject($"Food_{Time.frameCount}");
-        food.transform.SetParent(ResolveFoodParent());
-        food.transform.position = pos;
+        // GameObject food = new GameObject($"Food_{Time.frameCount}");
+        // food.transform.SetParent(ResolveFoodParent());
+        // food.transform.position = pos;
 
-        SpriteRenderer renderer = food.AddComponent<SpriteRenderer>();
-        renderer.sprite = ResolveFoodSprite();
+        // SpriteRenderer renderer = food.AddComponent<SpriteRenderer>();
+        // renderer.sprite = ResolveFoodSprite();
 
-        CircleCollider2D collider = food.AddComponent<CircleCollider2D>();
-        collider.isTrigger = true;
-        collider.radius = defaultFoodColliderRadius;
+        // CircleCollider2D collider = food.AddComponent<CircleCollider2D>();
+        // collider.isTrigger = true;
+        // collider.radius = defaultFoodColliderRadius;
 
-        Rigidbody2D body = food.AddComponent<Rigidbody2D>();
-        body.gravityScale = 0f;
-        body.bodyType = RigidbodyType2D.Kinematic;
+        // Rigidbody2D body = food.AddComponent<Rigidbody2D>();
+        // body.gravityScale = 0f;
+        // body.bodyType = RigidbodyType2D.Kinematic;
 
-        FoodController foodController = food.AddComponent<FoodController>();
-        foodController.Initialize(defaultFoodSinkSpeed);
+        // FoodController foodController = food.AddComponent<FoodController>();
+        // foodController.Initialize(defaultFoodSinkSpeed);
 
-        TrySetTag(food, "Food");
+        // TrySetTag(food, "Food");
     }
 
     private void SetupFoodRuntimeComponents(GameObject spawned)

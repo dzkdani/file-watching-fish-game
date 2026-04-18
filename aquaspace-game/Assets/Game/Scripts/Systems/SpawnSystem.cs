@@ -230,7 +230,7 @@ public class SpawnSystem : MonoBehaviour
 
         Vector3 spawnPosition = GetSpawnPosition();
         string objectName = $"Trash_{parsed.type}_{parsed.timestamp}";
-        string poolKey = BuildTrashPoolKey(sourcePath);
+        string poolKey = $"trash::{parsed.type}";
         GameObject trashObject;
 
         if (poolKey.TryAcquireFromPool(out trashObject))
@@ -310,7 +310,7 @@ public class SpawnSystem : MonoBehaviour
             new Vector2(0.5f, 0.5f),
             100f,
             0,
-            SpriteMeshType.Tight,
+            SpriteMeshType.FullRect,
             Vector4.zero,
             true);
     }
@@ -437,14 +437,9 @@ public class SpawnSystem : MonoBehaviour
         }
     }
 
-    private string BuildTrashPoolKey(string sourcePath)
-    {
-        return $"trash::{sourcePath}";
-    }
-
     private void EnsurePoolRoot()
     {
-        GameObject poolRootObject = new GameObject("__RuntimePoolRoot");
+        GameObject poolRootObject = new GameObject("PoolingRoot");
         poolRootObject.transform.SetParent(transform);
         poolRootObject.transform.localPosition = Vector3.zero;
         poolRoot = poolRootObject.transform;
@@ -624,15 +619,15 @@ public class SpawnSystem : MonoBehaviour
         }
     }
 
-    public bool DespawnTrash(GameObject trashObject)
+    public bool Despawn(GameObject obj, string tag)
     {
-        if (trashObject == null || !trashObject.CompareTag("Trash"))
+        if (obj == null || !obj.CompareTag(tag))
         {
             return false;
         }
 
-        RemoveSourceMappingForObject(trashObject);
-        trashObject.ReturnToPool(poolRoot);
+        RemoveSourceMappingForObject(obj);
+        obj.ReturnToPool(poolRoot);
         return true;
     }
 }

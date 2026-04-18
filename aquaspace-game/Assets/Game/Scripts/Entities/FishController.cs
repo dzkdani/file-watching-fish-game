@@ -346,7 +346,14 @@ public class FishController : MonoBehaviour
     {
         if (foodCollider != null)
         {
-            Destroy(foodCollider.gameObject);
+            if (SpawnSystem.Instance != null)
+            {
+                SpawnSystem.Instance.Despawn(foodCollider.gameObject, foodCollider.tag);
+            }
+            else
+            {
+                Destroy(foodCollider.gameObject);
+            }
         }
 
         currentHungerMeter = maxHungerMeter;
