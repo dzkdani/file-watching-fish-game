@@ -1,5 +1,4 @@
 using UnityEngine;
-using AquaspaceGame.Pooling;
 
 public class InputSystem : MonoBehaviour
 {
@@ -9,12 +8,9 @@ public class InputSystem : MonoBehaviour
     [Header("Food Spawn")]
     [SerializeField] private GameObject foodPrefab;
     [SerializeField] private Transform foodParent;
-    [SerializeField] private Sprite fallbackFoodSprite;
-    [SerializeField] private float defaultFoodPixelsPerUnit = 64f;
     [SerializeField] private float defaultFoodColliderRadius = 0.12f;
     [SerializeField] private float defaultFoodSinkSpeed = 0.5f;
 
-    private Sprite generatedFallbackSprite;
 
     private void Update()
     {
@@ -53,7 +49,7 @@ public class InputSystem : MonoBehaviour
             if (SpawnSystem.Instance == null || !SpawnSystem.Instance.Despawn(hit.gameObject, hit.tag))
             {
                 Debug.Log($"Trash{hit.gameObject.name} clicked but failed to despawn from pool");
-                // Destroy(hit.gameObject);
+                Destroy(hit.gameObject);
             }
             return;
         }
@@ -68,7 +64,7 @@ public class InputSystem : MonoBehaviour
     {
         if (foodPrefab != null)
         {
-            string objectName = $"Food_{Time.frameCount}";
+            string objectName = $"Food";
             string poolKey = $"food::{objectName}";
             GameObject foodObject;
 
@@ -89,26 +85,6 @@ public class InputSystem : MonoBehaviour
                 return;
             }
         }
-
-        // GameObject food = new GameObject($"Food_{Time.frameCount}");
-        // food.transform.SetParent(ResolveFoodParent());
-        // food.transform.position = pos;
-
-        // SpriteRenderer renderer = food.AddComponent<SpriteRenderer>();
-        // renderer.sprite = ResolveFoodSprite();
-
-        // CircleCollider2D collider = food.AddComponent<CircleCollider2D>();
-        // collider.isTrigger = true;
-        // collider.radius = defaultFoodColliderRadius;
-
-        // Rigidbody2D body = food.AddComponent<Rigidbody2D>();
-        // body.gravityScale = 0f;
-        // body.bodyType = RigidbodyType2D.Kinematic;
-
-        // FoodController foodController = food.AddComponent<FoodController>();
-        // foodController.Initialize(defaultFoodSinkSpeed);
-
-        // TrySetTag(food, "Food");
     }
 
     private void SetupFoodRuntimeComponents(GameObject spawned)
@@ -172,38 +148,6 @@ public class InputSystem : MonoBehaviour
         }
 
         return Camera.main;
-    }
-
-    private Sprite ResolveFoodSprite()
-    {
-        if (fallbackFoodSprite != null)
-        {
-            return fallbackFoodSprite;
-        }
-
-        if (generatedFallbackSprite != null)
-        {
-            return generatedFallbackSprite;
-        }
-
-        Texture2D texture = new Texture2D(32, 32, TextureFormat.RGBA32, false);
-        Color color = new Color(0.98f, 0.85f, 0.35f, 1f);
-        Color[] pixels = new Color[1024];
-        for (int i = 0; i < pixels.Length; i++)
-        {
-            pixels[i] = color;
-        }
-
-        texture.SetPixels(pixels);
-        texture.Apply();
-
-        generatedFallbackSprite = Sprite.Create(
-            texture,
-            new Rect(0f, 0f, texture.width, texture.height),
-            new Vector2(0.5f, 0.5f),
-            defaultFoodPixelsPerUnit);
-
-        return generatedFallbackSprite;
     }
 
     private void TrySetTag(GameObject target, string tagName)

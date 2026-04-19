@@ -5,8 +5,8 @@ public class TrashController : MonoBehaviour
     [Header("Movement")]
     [SerializeField] private float directionChangeInterval = 2f;
     [SerializeField] private float movementBoundsRadius = 5f;
-    [SerializeField] private float separationRadius = 1.0f;
-    [SerializeField] private float separationStrength = 1.2f;
+    [SerializeField] private float separationRadius = 1.85f;
+    [SerializeField] private float separationStrength = 0.95f;
 
     private readonly Collider2D[] separationBuffer = new Collider2D[24];
     private ContactFilter2D overlapFilter;
@@ -16,8 +16,6 @@ public class TrashController : MonoBehaviour
     private float minSpeed;
     private float maxSpeed;
     private float moveTimer;
-    
-    private bool initialized;
 
     private void OnEnable()
     {
@@ -38,28 +36,8 @@ public class TrashController : MonoBehaviour
         ConfigSystem.ConfigChanged -= ApplyConfig;
     }
 
-    public void Initialize(float minSpeedValue, float maxSpeedValue)
-    {
-        minSpeed = Mathf.Max(0f, minSpeedValue);
-        maxSpeed = Mathf.Max(0f, maxSpeedValue);
-        if (maxSpeed < minSpeed)
-        {
-            float temp = minSpeed;
-            minSpeed = maxSpeed;
-            maxSpeed = temp;
-        }
-
-        PickNewDirectionAndSpeed();
-        initialized = true;
-    }
-
     private void Update()
     {
-        if (!initialized)
-        {
-            return;
-        }
-
         float deltaTime = Time.deltaTime;
         moveTimer -= deltaTime;
         if (moveTimer <= 0f || direction.sqrMagnitude <= Mathf.Epsilon)
@@ -72,7 +50,7 @@ public class TrashController : MonoBehaviour
 
     private void Move(float deltaTime)
     {
-        Vector2 separation = ComputeFishSeparation();
+        Vector2 separation = ComputeSeparation();
         Vector2 moveDirection = direction;
         if (separation.sqrMagnitude > Mathf.Epsilon)
         {
@@ -100,7 +78,7 @@ public class TrashController : MonoBehaviour
         }
     }
 
-    private Vector2 ComputeFishSeparation()
+    private Vector2 ComputeSeparation()
     {
         Vector2 result = Vector2.zero;
         int count = Physics2D.OverlapCircle(transform.position, separationRadius, overlapFilter, separationBuffer);

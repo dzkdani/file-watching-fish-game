@@ -8,6 +8,6 @@
   "trashMinSpd": 0.5,
   "trashMaxSpd": 2.0,
   "maxFish": 2,
-  "maxTrash": 1,
+  "maxTrash": 4,
   "scanInterval": 1.0
 }

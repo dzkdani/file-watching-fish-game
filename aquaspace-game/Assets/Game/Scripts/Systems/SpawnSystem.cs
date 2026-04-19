@@ -4,7 +4,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System;
-using AquaspaceGame.Pooling;
 
 public class SpawnSystem : MonoBehaviour
 {
@@ -26,20 +25,15 @@ public class SpawnSystem : MonoBehaviour
     [Header("Bounds")]
     [SerializeField] private Camera boundsCamera;
     [SerializeField] private float spawnAreaPadding = 2.0f; 
-    [SerializeField] private float movementBoundsPadding = 1.0f;
+    [SerializeField] private float movementBoundsPadding = 2.5f;
 
     [Header("Collider")]
     [SerializeField] private ColliderBuildMode colliderBuildMode = ColliderBuildMode.PolygonPreferred;
     [SerializeField] private float colliderScale = 1f;
 
-    public List<FishData> fishDatabase;
-    public List<TrashData> trashDatabase;
-
     private float fallbackSpawnRadius = 500f;
     private int maxFish;
     private int maxTrashSpawn;
-    private float trashMinSpeed;
-    private float trashMaxSpeed;
 
     private readonly Dictionary<string, GameObject> spawnedBySourcePath = new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<GameObject, string> sourcePathBySpawned = new();
@@ -75,20 +69,11 @@ public class SpawnSystem : MonoBehaviour
     {
         if (config == null)
         {
+            Debug.LogWarning("Config data is null.");
             return;
         }
-
         maxFish = Mathf.Max(0, config.maxFish);
         maxTrashSpawn = Mathf.Max(0, config.maxTrash);
-
-        trashMinSpeed = config.trashMinSpd > 0f ? config.trashMinSpd : trashMinSpeed;
-        trashMaxSpeed = config.trashMaxSpd > 0f ? config.trashMaxSpd : trashMaxSpeed;
-        if (trashMaxSpeed < trashMinSpeed)
-        {
-            float temp = trashMinSpeed;
-            trashMinSpeed = trashMaxSpeed;
-            trashMaxSpeed = temp;
-        }
     }
 
     public void ProcessFile(string path)
@@ -217,7 +202,7 @@ public class SpawnSystem : MonoBehaviour
 
         Vector3 spawnPosition = GetSpawnPosition();
         GameObject fishObject = BuildSpriteObject($"Fish_{parsed.type}_{parsed.timestamp}", "Fish", spawnPosition, tex);
-        fishObject.AddComponent<FishController>();
+        if (fishObject.GetComponent<FishController>() == null) fishObject.AddComponent<FishController>();
         RegisterSourceMapping(sourcePath, fishObject);
     }
 
@@ -244,13 +229,7 @@ public class SpawnSystem : MonoBehaviour
             trashObject.AssignPoolKey(poolKey);
         }
 
-        TrashController trashController = trashObject.GetComponent<TrashController>();
-        if (trashController == null)
-        {
-            trashController = trashObject.AddComponent<TrashController>();
-        }
-
-        trashController.Initialize(trashMinSpeed, trashMaxSpeed);
+        if (trashObject.GetComponent<TrashController>() == null) trashObject.AddComponent<TrashController>();
         RegisterSourceMapping(sourcePath, trashObject);
     }
 
@@ -259,13 +238,6 @@ public class SpawnSystem : MonoBehaviour
         string objectName = $"{parsed.category}_{parsed.type}_{parsed.timestamp}";
         string tagName = parsed.category.Equals("trash", StringComparison.OrdinalIgnoreCase) ? "Trash" : "Fish";
         PrepareSpawnedObject(target, objectName, tagName, target.transform.position, tex);
-
-        TrashController trashController = target.GetComponent<TrashController>();
-        if (trashController != null)
-        {
-            trashController.Initialize(trashMinSpeed, trashMaxSpeed);
-        }
-
         RegisterSourceMapping(sourcePath, target);
     }
 

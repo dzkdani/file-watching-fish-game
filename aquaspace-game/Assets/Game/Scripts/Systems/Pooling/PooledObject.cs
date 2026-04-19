@@ -1,15 +1,12 @@
 using UnityEngine;
 
-namespace AquaspaceGame.Pooling
+public class PooledObject : MonoBehaviour
 {
-    public class PooledObject : MonoBehaviour
-    {
-        [SerializeField] private string poolKey;
+    [SerializeField] private string poolKey;
 
-        public string PoolKey
-        {
-            get => poolKey;
-            set => poolKey = value;
-        }
+    public string PoolKey
+    {
+        get => poolKey;
+        set => poolKey = value;
     }
 }

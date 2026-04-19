@@ -24,8 +24,8 @@ public class FishController : MonoBehaviour
     [SerializeField] private float hungerCooldownTimer;
 
     [Header("Separation")]
-    [SerializeField] private float separationRadius = 0.9f;
-    [SerializeField] private float separationStrength = 1.25f;
+    [SerializeField] private float separationRadius = 1.85f;
+    [SerializeField] private float separationStrength = 0.95f;
 
     [Header("Fallback Config")]
     [SerializeField] private float defaultMinSpeed = 1f;
@@ -158,7 +158,7 @@ public class FishController : MonoBehaviour
     {
         if (currentHungerMeter <= 0f)
         {
-            EnterSeekFoodState();
+            EnterWanderState(forceNewDirection: true);
             return;
         }
 
@@ -241,7 +241,7 @@ public class FishController : MonoBehaviour
         }
 
         Vector3 nextPosition = transform.position + (Vector3)(moveDirection * currentSpeed * deltaTime);
-        nextPosition = ClampToBounds(nextPosition);
+        nextPosition = ClampToBounds(nextPosition).normalized;
         transform.position = nextPosition;
 
         if (state != FishState.Idle)
