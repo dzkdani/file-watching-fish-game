@@ -112,7 +112,6 @@ public static class ConfigSystem
             fishMinSpd = 1f,
             fishMaxSpd = 5f,
             fishMaxHungerMeter = 100f,
-            fishHungerDecay = 10f,
             fishHungerCooldown = 5f,
             foodDetectionRadius = 10f,
             trashMinSpd = 1f,
@@ -162,7 +161,6 @@ public static class ConfigSystem
         if (data.fishMinSpd < 0) return false;
         if (data.fishMaxSpd < data.fishMinSpd) return false;
         if (data.fishMaxHungerMeter < 0) return false;
-        if (data.fishHungerDecay < 0) return false;
         if (data.fishHungerCooldown < 0) return false;
         if (data.foodDetectionRadius < 0) return false;
         if (data.maxFish < 0) return false;
@@ -175,13 +173,12 @@ public static class ConfigSystem
     }
 }
 
-[System.Serializable]
+[Serializable]
 public class ConfigData
 {
     public float fishMinSpd;
     public float fishMaxSpd;
     public float fishMaxHungerMeter;
-    public float fishHungerDecay;
     public float fishHungerCooldown;
     public float foodDetectionRadius;
     public float trashMinSpd;

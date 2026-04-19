@@ -402,6 +402,7 @@ public class SpawnSystem : MonoBehaviour
         try
         {
             target.tag = tagName;
+            target.layer = LayerMask.NameToLayer(tagName);
         }
         catch (UnityException)
         {

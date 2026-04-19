@@ -2,14 +2,10 @@ using UnityEngine;
 
 public class TrashController : MonoBehaviour
 {
-    [Header("Movement")]
-    [SerializeField] private float directionChangeInterval = 2f;
-    [SerializeField] private float movementBoundsRadius = 5f;
-    [SerializeField] private float separationRadius = 1.85f;
-    [SerializeField] private float separationStrength = 0.95f;
-
-    private readonly Collider2D[] separationBuffer = new Collider2D[24];
-    private ContactFilter2D overlapFilter;
+    [Header("Refs")]
+    [SerializeField] private MovementController movement;
+    [SerializeField] private SeparationBehavior separation;
+    [SerializeField] private TrashConfig config;
 
     private Vector2 direction;
     private float speed;
@@ -17,98 +13,110 @@ public class TrashController : MonoBehaviour
     private float maxSpeed;
     private float moveTimer;
 
+    private float separationStrength;
+    private float directionChangeInterval;
+
     private void OnEnable()
     {
-        overlapFilter = new ContactFilter2D();
-        overlapFilter.useTriggers = true;
+        Init();
+
+        ApplyBaseConfig();
 
         ConfigSystem.Initialize();
-        ConfigSystem.ConfigChanged += ApplyConfig;
+        ConfigSystem.ConfigChanged += ApplyRuntimeConfig;
 
         if (ConfigSystem.Data != null)
-        {
-            ApplyConfig(ConfigSystem.Data);
-        }
+            ApplyRuntimeConfig(ConfigSystem.Data);
+
+        PickNewDirectionAndSpeed();
     }
 
     private void OnDisable()
     {
-        ConfigSystem.ConfigChanged -= ApplyConfig;
+        ConfigSystem.ConfigChanged -= ApplyRuntimeConfig;
+    }
+
+    private void Init()
+    {
+        movement = GetComponent<MovementController>();
+        if (movement == null)
+            movement = gameObject.AddComponent<MovementController>();
+        separation = GetComponent<SeparationBehavior>();
+        if (separation == null)
+            separation = gameObject.AddComponent<SeparationBehavior>();
+        if (config == null)
+            config = ScriptableObject.CreateInstance<TrashConfig>();
     }
 
     private void Update()
     {
-        float deltaTime = Time.deltaTime;
-        moveTimer -= deltaTime;
+        float dt = Time.deltaTime;
+
+        moveTimer -= dt;
         if (moveTimer <= 0f || direction.sqrMagnitude <= Mathf.Epsilon)
         {
             PickNewDirectionAndSpeed();
         }
 
-        Move(deltaTime);
+        Vector2 sep = separation.Calculate(transform.position, transform) * separationStrength;
+        Vector2 moveDir = Blend(direction, sep);
+
+        movement.Move(moveDir, speed, dt);
+
+        if (moveDir.sqrMagnitude > Mathf.Epsilon)
+        {
+            direction = moveDir;
+        }
     }
 
-    private void Move(float deltaTime)
-    {
-        Vector2 separation = ComputeSeparation();
-        Vector2 moveDirection = direction;
-        if (separation.sqrMagnitude > Mathf.Epsilon)
-        {
-            moveDirection = (moveDirection + separation * separationStrength).normalized;
-        }
+    // =========================
+    // CONFIG
+    // =========================
 
-        if (moveDirection.sqrMagnitude <= Mathf.Epsilon)
+    private void ApplyBaseConfig()
+    {
+        if (config == null)
         {
+            Debug.LogWarning($"{name} missing TrashBehaviorConfig");
             return;
         }
 
-        Vector3 previousPosition = transform.position;
-        Vector3 nextPosition = previousPosition + (Vector3)(moveDirection * speed * deltaTime);
-        Vector3 clampedPosition = ClampToBounds(nextPosition);
-        transform.position = clampedPosition;
+        minSpeed = config.minSpeed;
+        maxSpeed = config.maxSpeed;
+        directionChangeInterval = config.directionChangeInterval;
+        separationStrength = config.separationStrength;
 
-        Vector2 actualMove = (Vector2)clampedPosition - (Vector2)previousPosition;
-        if (actualMove.sqrMagnitude <= Mathf.Epsilon)
-        {
-            direction = (-moveDirection).normalized;
-        }
-        else
-        {
-            direction = moveDirection;
-        }
+        ValidateSpeed();
     }
 
-    private Vector2 ComputeSeparation()
+    private void ApplyRuntimeConfig(ConfigData runtime)
     {
-        Vector2 result = Vector2.zero;
-        int count = Physics2D.OverlapCircle(transform.position, separationRadius, overlapFilter, separationBuffer);
+        if (runtime == null) return;
 
-        for (int i = 0; i < count; i++)
-        {
-            Collider2D collider = separationBuffer[i];
-            if (collider == null || collider.gameObject == gameObject)
-            {
-                continue;
-            }
+        float rMin = runtime.trashMinSpd;
+        float rMax = runtime.trashMaxSpd;
 
-            if (!collider.CompareTag("Fish"))
-            {
-                continue;
-            }
+        if (rMin > 0f) minSpeed = rMin;
+        if (rMax > 0f) maxSpeed = rMax;
 
-            Vector2 away = (Vector2)transform.position - (Vector2)collider.transform.position;
-            float distance = away.magnitude;
-            if (distance <= 0.001f)
-            {
-                continue;
-            }
+        ValidateSpeed();
 
-            float weight = 1f - Mathf.Clamp01(distance / separationRadius);
-            result += (away / distance) * weight;
-        }
-
-        return result;
+        speed = Mathf.Clamp(speed, minSpeed, maxSpeed);
     }
+
+    private void ValidateSpeed()
+    {
+        if (maxSpeed < minSpeed)
+        {
+            float tmp = minSpeed;
+            minSpeed = maxSpeed;
+            maxSpeed = tmp;
+        }
+    }
+
+    // =========================
+    // MOVEMENT
+    // =========================
 
     private void PickNewDirectionAndSpeed()
     {
@@ -117,68 +125,11 @@ public class TrashController : MonoBehaviour
         moveTimer = directionChangeInterval;
     }
 
-    private Vector3 ClampToBounds(Vector3 position)
+    private Vector2 Blend(Vector2 baseDir, Vector2 separation)
     {
-        if (!TryGetActiveBounds(out Rect bounds))
-        {
-            return position;
-        }
+        if (separation.sqrMagnitude <= Mathf.Epsilon)
+            return baseDir;
 
-        float clampedX = Mathf.Clamp(position.x, bounds.xMin, bounds.xMax);
-        float clampedY = Mathf.Clamp(position.y, bounds.yMin, bounds.yMax);
-        return new Vector3(clampedX, clampedY, position.z);
-    }
-
-    private bool TryGetActiveBounds(out Rect bounds)
-    {
-        if (SpawnSystem.Instance != null && SpawnSystem.Instance.TryGetMovementBounds(out bounds))
-        {
-            return true;
-        }
-
-        Vector2 center = GetFallbackBoundsCenter();
-        float radius = Mathf.Max(0.01f, movementBoundsRadius);
-        bounds = Rect.MinMaxRect(center.x - radius, center.y - radius, center.x + radius, center.y + radius);
-        return true;
-    }
-
-    private Vector2 GetFallbackBoundsCenter()
-    {
-        if (SpawnSystem.Instance != null && SpawnSystem.Instance.spawnParent != null)
-        {
-            return SpawnSystem.Instance.spawnParent.position;
-        }
-
-        return Vector2.zero;
-    }
-
-    private void ApplyConfig(ConfigData config)
-    {
-        if (config == null)
-        {
-            return;
-        }
-
-        float configMin = config.trashMinSpd > 0f ? config.trashMinSpd : minSpeed;
-        float configMax = config.trashMaxSpd > 0f ? config.trashMaxSpd : maxSpeed;
-
-        if (configMin > 0f)
-        {
-            minSpeed = configMin;
-        }
-
-        if (configMax > 0f)
-        {
-            maxSpeed = configMax;
-        }
-
-        if (maxSpeed < minSpeed)
-        {
-            float temp = minSpeed;
-            minSpeed = maxSpeed;
-            maxSpeed = temp;
-        }
-
-        speed = Mathf.Clamp(speed, minSpeed, maxSpeed);
+        return (baseDir + separation).normalized;
     }
 }

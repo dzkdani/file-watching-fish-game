@@ -68,6 +68,7 @@ public class InputSystem : MonoBehaviour
             string poolKey = $"food::{objectName}";
             GameObject foodObject;
 
+
             if (poolKey.TryAcquireFromPool(out foodObject))
             {
                 foodObject.transform.SetParent(ResolveFoodParent());
@@ -155,6 +156,7 @@ public class InputSystem : MonoBehaviour
         try
         {
             target.tag = tagName;
+            target.layer = LayerMask.NameToLayer(tagName);
         }
         catch (UnityException)
         {

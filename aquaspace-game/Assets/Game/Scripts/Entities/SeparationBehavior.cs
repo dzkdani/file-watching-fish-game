@@ -1,49 +1,52 @@
 using UnityEngine;
 
-public static class SeparationBehavior
+public class SeparationBehavior : MonoBehaviour
 {
-    private static readonly Collider2D[] separationBuffer = new Collider2D[32];
-    private static readonly ContactFilter2D overlapFilter = new ContactFilter2D { useTriggers = true };
+    [SerializeField] private float radius = 2f;
+    [SerializeField] private float strength = 1f;
+    [SerializeField] private LayerMask layerMask;
 
-    private static Vector2 ComputeSeparation(Transform transform, float separationRadius, string[] targetTag)
+    private readonly Collider2D[] buffer = new Collider2D[64];
+    private ContactFilter2D filter;
+    private float sqrRadius;
+
+    private void Awake()
     {
+        filter = new ContactFilter2D();
+        filter.useTriggers = true;
+        filter.SetLayerMask(LayerMask.GetMask("Fish", "Trash"));
+        // filter.SetLayerMask(layerMask);
+        sqrRadius = radius * radius;
+    }
+
+    public void SetLayerMask(LayerMask newMask)
+    {
+        filter.SetLayerMask(newMask);
+    }
+
+    public Vector2 Calculate(Vector2 position, Transform self)
+    {
+        int count = Physics2D.OverlapCircle(position, radius, filter, buffer);
+
         Vector2 result = Vector2.zero;
-        int count = Physics2D.OverlapCircle(transform.position, separationRadius, overlapFilter, separationBuffer);
 
         for (int i = 0; i < count; i++)
         {
-            Collider2D collider = separationBuffer[i];
-            if (collider == null || collider.gameObject == transform.gameObject)
-            {
-                continue;
-            }
+            var col = buffer[i];
+            if (col == null || col.gameObject == self) continue;
 
-            bool isTargetTag = false;
-            foreach (string tag in targetTag)
-            {
-                if (collider.CompareTag(tag))
-                {
-                    isTargetTag = true;
-                    break;
-                }
-            }
+            Vector2 away = position - (Vector2)col.transform.position;
+            float sqrDist = away.sqrMagnitude;
 
-            if (!isTargetTag)
-            {
-                continue;
-            }
+            if (sqrDist <= 0.000001f) continue;
 
-            Vector2 away = (Vector2)transform.position - (Vector2)collider.transform.position;
-            float distance = away.magnitude;
-            if (distance <= 0.001f)
-            {
-                continue;
-            }
-
-            float weight = 1f - Mathf.Clamp01(distance / separationRadius);
-            result += (away / distance) * weight;
+            float weight = 1f - Mathf.Clamp01(sqrDist / sqrRadius);
+            result += away.normalized * weight;
         }
 
-        return result;
+        if (count > 0)
+            result /= count;
+
+        return result * strength;
     }
 }
