@@ -77,3 +77,11 @@ This is a aquascape game for test, that implement
   - speed ranges
   - hunger values
   - detection radius
+
+
+## AI Usage
+
+- Use of context-aware AI-Agent a soft MCP implementation using :
+  - AGENT.md
+  - Skills
+- Agent used OpenAI
