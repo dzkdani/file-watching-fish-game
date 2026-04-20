@@ -3,7 +3,7 @@
 This is a aquascape game for test, that implement 
 - file watcher system, 
 - realtime config, 
-- and hot-reload
+- and hot-reload assets updater
 
 ## Game
 - config.json handle gameplay setting
@@ -28,6 +28,7 @@ This is a aquascape game for test, that implement
   - TRASH → Trash entity
 - File loading must be async
 - Do NOT block main thread
+- folder location (C:\Users\%userprofile%\AppData\LocalLow\DefaultCompany\aquaspace-game) 
 
 ## Spawning Rules
 - Spawn inside defined bounds
