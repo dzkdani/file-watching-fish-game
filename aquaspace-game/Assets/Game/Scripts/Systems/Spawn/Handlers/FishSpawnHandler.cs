@@ -1,23 +1,25 @@
 using UnityEngine;
+using System;
+
 
 public class FishSpawnHandler : ISpawnHandler
 {
     private readonly ISpawnFactory factory;
     private readonly SpawnTracker tracker;
-    private readonly int maxFish;
+    private readonly Func<int>  maxFish;
 
-    public FishSpawnHandler(ISpawnFactory factory, SpawnTracker tracker, int maxFish)
+    public FishSpawnHandler(ISpawnFactory factory, SpawnTracker tracker, Func<int> maxFishProvider)
     {
         this.factory = factory;
         this.tracker = tracker;
-        this.maxFish = maxFish;
+        this.maxFish = maxFishProvider;
     }
 
     public bool CanHandle(string category) => category == "fish";
 
     public GameObject Spawn(ParsedFileData data, Texture2D tex)
     {
-        if (!tracker.CanSpawn("Fish", maxFish))
+        if (!tracker.CanSpawn("Fish", maxFish()))
             return null;
 
         var obj = factory.Create($"Fish_{data.type}", "Fish", Vector3.zero, tex);

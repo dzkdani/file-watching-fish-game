@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class TrashController : MonoBehaviour
+public class TrashController : MonoBehaviour, IPoolable
 {
     [Header("Refs")]
     [SerializeField] private MovementController movement;
@@ -131,5 +131,10 @@ public class TrashController : MonoBehaviour
             return baseDir;
 
         return (baseDir + separation).normalized;
+    }
+
+    public void ReturnToPool()
+    {
+        gameObject.ReturnToPool();
     }
 }

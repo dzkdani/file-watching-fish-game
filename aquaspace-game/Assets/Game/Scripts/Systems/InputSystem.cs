@@ -46,11 +46,7 @@ public class InputSystem : MonoBehaviour
 
         if (hit.CompareTag("Trash"))
         {
-            if (SpawnSystem.Instance == null || !SpawnSystem.Instance.Despawn(hit.gameObject, hit.tag))
-            {
-                Debug.Log($"Trash{hit.gameObject.name} clicked but failed to despawn from pool");
-                Destroy(hit.gameObject);
-            }
+            SpawnSystem.Instance.Despawn(hit.gameObject);
             return;
         }
 
@@ -67,7 +63,6 @@ public class InputSystem : MonoBehaviour
             string objectName = $"Food";
             string poolKey = $"food::{objectName}";
             GameObject foodObject;
-
 
             if (poolKey.TryAcquireFromPool(out foodObject))
             {

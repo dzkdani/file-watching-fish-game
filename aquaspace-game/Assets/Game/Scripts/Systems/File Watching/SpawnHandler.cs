@@ -1,23 +1,40 @@
 using UnityEngine;
+using System;
+using System.Threading.Tasks;
 
-/// <summary>
-/// Triggers spawning through the SpawnSystem for detected file changes.
-/// </summary>
 public class SpawnHandler
 {
-    public void ProcessFile(string filePath)
+    public async Task ProcessFile(string path)
     {
-        if (SpawnSystem.Instance != null)
+        ParsedFileData parsed;
+        try
         {
-            SpawnSystem.Instance.ProcessFile(filePath);
+            parsed = FileParser.Parse(path);
         }
+        catch (Exception e)
+        {
+            Debug.LogWarning($"Parse failed: {e.Message}");
+            return;
+        }
+
+        Texture2D tex;
+        try
+        {
+            byte[] data = await System.IO.File.ReadAllBytesAsync(path);
+            tex = new Texture2D(2, 2);
+            tex.LoadImage(data);
+        }
+        catch (Exception e)
+        {
+            Debug.LogWarning($"Texture load failed: {e.Message}");
+            return;
+        }
+
+        SpawnSystem.Instance.Spawn(path, parsed, tex);
     }
 
-    public void RemoveSpawned(string sourceFile)
+    public void RemoveSpawned(string path)
     {
-        if (SpawnSystem.Instance != null)
-        {
-            SpawnSystem.Instance.RemoveSpawnedFromSource(sourceFile);
-        }
+        SpawnSystem.Instance.RemoveBySource(path);
     }
 }

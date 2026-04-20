@@ -97,6 +97,8 @@ public class FishController : MonoBehaviour
         {
             direction = moveDir;
         }
+
+        HandleFacing(moveDir);
     }
 
     // =========================
@@ -193,7 +195,7 @@ public class FishController : MonoBehaviour
     private void Consume(Collider2D food)
     {
         if (SpawnSystem.Instance != null)
-            SpawnSystem.Instance.Despawn(food.gameObject, food.tag);
+            SpawnSystem.Instance.Despawn(food.gameObject);
         else
             Destroy(food.gameObject);
 
@@ -201,6 +203,17 @@ public class FishController : MonoBehaviour
         hungerCooldownTimer = hungerCooldown;
 
         EnterWander();
+    }
+
+    private void HandleFacing(Vector2 moveDir)
+    {
+        if (moveDir.sqrMagnitude < 0.0001f)
+            return;
+        bool faceRight = moveDir.x > 0f;
+
+        Vector3 scale = transform.localScale;
+        scale.x = faceRight ? -Mathf.Abs(scale.x) : Mathf.Abs(scale.x);
+        transform.localScale = scale;
     }
 
     // =========================

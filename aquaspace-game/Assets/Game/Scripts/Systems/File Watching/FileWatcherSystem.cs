@@ -137,7 +137,7 @@ public class FileWatcherSystem : MonoBehaviour
 
     private void OnFileChanged(string filePath)
     {
-        _spawningTrigger.ProcessFile(filePath);
+        _ = _spawningTrigger.ProcessFile(filePath);
     }
 
     private void OnFileRemoved(string filePath)

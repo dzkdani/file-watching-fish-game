@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class FoodController : MonoBehaviour
+public class FoodController : MonoBehaviour, IPoolable
 {
     [SerializeField] private float sinkSpeed = 0.5f;
 
@@ -27,7 +27,12 @@ public class FoodController : MonoBehaviour
     {
         if (transform.position.y < -10f)
         {
-            SpawnSystem.Instance.Despawn(gameObject, gameObject.tag);
+            ReturnToPool();
         }
+    }
+
+    public void ReturnToPool()
+    {
+        gameObject.ReturnToPool();
     }
 }

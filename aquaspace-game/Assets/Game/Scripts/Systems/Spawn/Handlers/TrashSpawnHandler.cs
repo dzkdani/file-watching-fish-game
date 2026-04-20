@@ -1,12 +1,13 @@
+using System;
 using UnityEngine;
 
 public class TrashSpawnHandler : ISpawnHandler
 {
     private readonly ISpawnFactory factory;
     private readonly SpawnTracker tracker;
-    private readonly int maxTrash;
+    private readonly Func<int> maxTrash;
 
-    public TrashSpawnHandler(ISpawnFactory factory, SpawnTracker tracker, int maxTrash)
+    public TrashSpawnHandler(ISpawnFactory factory, SpawnTracker tracker, Func<int>  maxTrash)
     {
         this.factory = factory;
         this.tracker = tracker;
@@ -17,16 +18,26 @@ public class TrashSpawnHandler : ISpawnHandler
 
     public GameObject Spawn(ParsedFileData data, Texture2D tex)
     {
-        if (!tracker.CanSpawn("Trash", maxTrash))
+        if (!tracker.CanSpawn("Trash", maxTrash()))
             return null;
 
-        var obj = factory.Create($"Trash_{data.type}", "Trash", Vector3.zero, tex);
+        string poolKey = $"trash::Trash";
 
-        obj.AddComponent<TrashController>();
+        var obj = factory.Create(
+            $"Trash_{data.type}",
+            "Trash",
+            Vector3.zero,
+            tex,
+            poolKey
+        );
+
+        if (obj.GetComponent<TrashController>() == null)
+            obj.AddComponent<TrashController>();
+
         tracker.Register("Trash");
 
         return obj;
-    }
+}
 
     public void Update(GameObject obj, ParsedFileData data, Texture2D tex)
     {

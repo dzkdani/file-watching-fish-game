@@ -23,12 +23,13 @@ public static class PoolExtensions
         return ObjectPoolRegistry.TryAcquire(poolKey, out instance);
     }
 
-    public static void ReturnToPool(this GameObject instance, Transform poolRoot = null)
+    public static bool ReturnToPool(this GameObject instance, Transform poolRoot = null)
     {
         if (instance == null)
         {
-            return;
+            return false;
         }
+
 
         PooledObject pooledObject = instance.GetComponent<PooledObject>();
         if (pooledObject == null || string.IsNullOrWhiteSpace(pooledObject.PoolKey))
@@ -41,9 +42,10 @@ public static class PoolExtensions
             {
                 Object.DestroyImmediate(instance);
             }
-            return;
+            return false;
         }
 
         ObjectPoolRegistry.Release(pooledObject.PoolKey, instance, poolRoot);
+        return true;
     }
 }

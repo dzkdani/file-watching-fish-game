@@ -1,17 +1,24 @@
-
 using UnityEngine;
+
 public static class BoundsUtility
 {
+    private static CameraBoundsUtility _service;
+
+    public static void Initialize(CameraBoundsUtility service)
+    {
+        _service = service;
+    }
+
     public static bool TryGetBounds(out Rect bounds)
     {
-        if (SpawnSystem.Instance != null &&
-            SpawnSystem.Instance.TryGetMovementBounds(out bounds))
+        if (_service != null)
         {
+            bounds = _service.GetBounds(0f);
             return true;
         }
 
-        bounds = Rect.MinMaxRect(-5, -5, 5, 5);
-        return true;
+        bounds = default;
+        return false;
     }
 
     public static Vector3 Clamp(Vector3 pos)
