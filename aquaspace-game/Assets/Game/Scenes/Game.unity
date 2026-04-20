@@ -128,8 +128,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 240677875}
+  - component: {fileID: 240677876}
   m_Layer: 0
-  m_Name: _poolRoot
+  m_Name: FoodPool
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -150,6 +151,20 @@ Transform:
   m_Children: []
   m_Father: {fileID: 511191338}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &240677876
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 240677874}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3d6bc71287e310042aecd069f354c8f0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FoodSpawner
+  foodPrefab: {fileID: 2620478836065815437, guid: 83468df4976156d4280987ff99d78a1c, type: 3}
+  foodParent: {fileID: 511191338}
 --- !u!1 &511191337
 GameObject:
   m_ObjectHideFlags: 0
@@ -227,10 +242,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::InputSystem
   inputCamera: {fileID: 914597928}
-  foodPrefab: {fileID: 2620478836065815437, guid: 83468df4976156d4280987ff99d78a1c, type: 3}
-  foodParent: {fileID: 511191338}
-  defaultFoodColliderRadius: 0.12
-  defaultFoodSinkSpeed: 0.5
+  foodSpawner: {fileID: 240677876}
 --- !u!1 &914597926
 GameObject:
   m_ObjectHideFlags: 0
