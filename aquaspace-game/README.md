@@ -1,4 +1,13 @@
-# Unity Aquascape Test - Agent Context
+# Overview
+
+This is a aquascape game for test, that implement 
+- file watcher system, 
+- realtime config, 
+- and hot-reload
+
+## Game
+- config.json handle gameplay setting
+- input are left-mouse click
 
 ## Core Architecture
 - Use modular, decoupled systems
@@ -67,23 +76,3 @@
   - speed ranges
   - hunger values
   - detection radius
-
-## Performance Rules
-- Avoid Instantiate/Destroy in loops → use pooling
-- Avoid FindObjectOfType
-- Minimize GC allocations
-
-## Tech Stack
-- Unity 2D
-- DOTween for movement
-- Object Pooling required
-
-## Design Principles
-- SOLID principles
-- Clean code practices
-- Modular, reusable components
-- Clear separation of concerns
-
-
-## Goal
-Produce clean, modular, reusable systems suitable for scaling
