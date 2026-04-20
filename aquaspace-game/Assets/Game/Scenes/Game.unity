@@ -180,15 +180,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 941dd1ed33826d0409c128a8723e8533, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SpawnSystem
-  spawnParent: {fileID: 511191338}
-  collisionCheckRadius: 0.25
-  maxSpawnPositionAttempts: 10
-  spawnIntervalSeconds: 0.1
-  boundsCamera: {fileID: 914597928}
-  spawnAreaPadding: 0.5
-  movementBoundsPadding: 0.25
-  colliderBuildMode: 0
-  colliderScale: 1
 --- !u!114 &511191341
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -312,8 +303,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.UniversalAdditionalCameraData
   m_RenderShadows: 1
-  m_RequiresDepthTextureOption: 2
-  m_RequiresOpaqueTextureOption: 2
+  m_RequiresDepthTextureOption: 1
+  m_RequiresOpaqueTextureOption: 1
   m_CameraType: 0
   m_Cameras: []
   m_RendererIndex: -1

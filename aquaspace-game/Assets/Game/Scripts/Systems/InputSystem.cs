@@ -46,11 +46,11 @@ public class InputSystem : MonoBehaviour
 
         if (hit.CompareTag("Trash"))
         {
-            if (SpawnSystem.Instance == null || !SpawnSystem.Instance.Despawn(hit.gameObject, hit.tag))
-            {
-                Debug.Log($"Trash{hit.gameObject.name} clicked but failed to despawn from pool");
-                Destroy(hit.gameObject);
-            }
+            // if (SpawnSystem.Instance == null || !SpawnSystem.Instance.Despawn(hit.gameObject, hit.tag))
+            // {
+            //     Debug.Log($"Trash{hit.gameObject.name} clicked but failed to despawn from pool");
+            //     Destroy(hit.gameObject);
+            // }
             return;
         }
 
@@ -133,10 +133,10 @@ public class InputSystem : MonoBehaviour
             return foodParent;
         }
 
-        if (SpawnSystem.Instance != null && SpawnSystem.Instance.spawnParent != null)
-        {
-            return SpawnSystem.Instance.spawnParent;
-        }
+        // if (SpawnSystem.Instance != null && SpawnSystem.Instance.spawnParent != null)
+        // {
+        //     return SpawnSystem.Instance.spawnParent;
+        // }
 
         return null;
     }
